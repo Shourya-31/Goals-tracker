@@ -3,35 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>YeolPumta + </title>
+  <title>YeolPumta+ Home</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>YeolPumta + </h1>
-    <button id="exportCsv" title="Export completed tasks">📤 Export CSV</button>
-  </header>
-
-  <main>
-    <section class="new-task">
-      <input type="text" id="taskInput" placeholder="What’s next?" />
-      <button id="addTask">＋ Add Task</button>
-    </section>
-
-    <section class="stats">
-      <div>Total Time: <span id="totalTime">00:00:00</span></div>
-      <div>Pomodoro: <button id="startPomodoro">Start Pomodoro</button></div>
-    </section>
-
-    <section class="charts">
-      <canvas id="dailyChart"></canvas>
-      <canvas id="weeklyChart"></canvas>
-    </section>
-
-    <ul id="taskList" class="task-list"></ul>
-  </main>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="script.js"></script>
+  <nav>
+    <a href="index.html" class="active">Home</a>
+    <a href="tasks.html">Tasks</a>
+    <a href="pomodoro.html">Pomodoro</a>
+  </nav>
+  <div class="container">
+    <h2>Welcome to YeolPumta+</h2>
+    <p>Track your tasks, manage your time, and boost productivity with a soothing interface.</p>
+  </div>
 </body>
 </html>
