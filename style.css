@@ -38,6 +38,18 @@ nav a.active::after {
   z-index: 1000;
 }
 
+/* Overlay covering entire screen */
+#overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
 /* Hidden helper */
 #overlay.hidden { display: none; }
 
@@ -65,10 +77,17 @@ nav a.active::after {
 }
 
 /* Buttons inside modal */
-#modalPause, #modalClose {
+.modal-buttons button {
+  margin: 0 0.5rem;
   padding: 0.5rem 1rem;
   font-size: 1rem;
 }
+
+/* Task card tweaks */
+.task-card.completed .name {
+  color: #999;
+}
+
 
 /* Containers */
 .container {
