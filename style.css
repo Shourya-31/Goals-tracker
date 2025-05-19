@@ -52,6 +52,37 @@ nav a.active::after {
   height: 3px;
   background: var(--accent);
 }
+nav {
+  background: #084c61;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+nav a.active {
+  border-bottom: 3px solid #ffd23f;
+  padding-bottom: 4px;
+}
+
+.theme-switcher {
+  margin-left: auto;
+  color: #fff;
+  font-size: 0.9em;
+}
+
+.theme-switcher select {
+  margin-left: 8px;
+  padding: 4px;
+  border-radius: 4px;
+}
+
 
 /* ─── MODAL (FOCUS TIMER) ────────────────────────────────── */
 #overlay {
