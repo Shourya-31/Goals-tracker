@@ -9,15 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   const selector = document.getElementById('themeSelector');
   function applyTheme(name) {
-    Object.entries(themes[name]).forEach(([k,v])=>
+    Object.entries(themes[name]||themes.light).forEach(([k,v])=>
       document.documentElement.style.setProperty(k,v)
     );
     localStorage.setItem('yp-theme', name);
-    selector.value = name;
+    if (selector) selector.value = name;
   }
-  const saved = localStorage.getItem('yp-theme') || 'light';
-  applyTheme(saved);
-  selector.onchange = () => applyTheme(selector.value);
+  // init theme
+  const savedTheme = localStorage.getItem('yp-theme') || 'light';
+  applyTheme(savedTheme);
+  if (selector) selector.onchange = () => applyTheme(selector.value);
 
   // ─── HELPERS ──────────────────────────────────────────────────
   const fmtMS = sec => {
@@ -31,9 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return str.slice(0,c)+'…'+str.slice(-c);
   };
 
-  // ─── STATE & REFS ────────────────────────────────────────────
-  let tasks = [];
+  // ─── STATE & DOM REFS ────────────────────────────────────────
+  let tasks = JSON.parse(localStorage.getItem('yp-tasks')||'[]');
+  tasks.forEach(t => t.intervalId = null); // ensure no stray intervals
   let activeIdx = null;
+
   const listEl    = document.getElementById('list');
   const addBtn    = document.getElementById('addBtn');
   const inputEl   = document.getElementById('newTask');
@@ -41,7 +44,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalName = document.getElementById('modalName');
   const modalTime = document.getElementById('modalTimer');
   const pauseBtn  = document.getElementById('pauseBtn');
+  const resumeBtn = document.getElementById('resumeBtn');
   const closeBtn  = document.getElementById('closeBtn');
+
+  function saveTasks() {
+    // strip out intervalIds
+    const copy = tasks.map(t => ({
+      name: t.name,
+      time: t.time,
+      done: t.done
+    }));
+    localStorage.setItem('yp-tasks', JSON.stringify(copy));
+  }
 
   // ─── RENDER & BIND ───────────────────────────────────────────
   function render() {
@@ -62,13 +76,14 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>`;
       listEl.appendChild(li);
     });
-    // bind buttons
+
+    // bind action buttons
     listEl.querySelectorAll('[data-act]').forEach(btn=>{
       const i = +btn.dataset.i, act = btn.dataset.act;
       btn.onclick = ()=>{
         if(act==='start') openModal(i);
         if(act==='pause') stopTimer(i);
-        if(act==='reset'){ stopTimer(i); tasks[i].time=0; render(); }
+        if(act==='reset'){ stopTimer(i); tasks[i].time=0; saveTasks(); render(); }
       };
     });
     // bind checkboxes
@@ -77,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const i = +cb.dataset.i;
         stopTimer(i);
         tasks[i].done = cb.checked;
+        saveTasks();
         render();
       };
     });
@@ -87,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const name = inputEl.value.trim();
     if(!name) return;
     tasks.push({ name, time:0, done:false, intervalId:null });
+    saveTasks();
     inputEl.value='';
     render();
   };
@@ -117,12 +134,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if(tasks[i]?.intervalId!=null){
       clearInterval(tasks[i].intervalId);
       tasks[i].intervalId = null;
+      saveTasks();
     }
   }
 
   // ─── MODAL CONTROLS ─────────────────────────────────────────
-  pauseBtn.onclick = ()=> { if(activeIdx!=null) stopTimer(activeIdx); };
-  closeBtn.onclick = ()=>{
+  pauseBtn.onclick  = ()=> { if(activeIdx!=null) stopTimer(activeIdx); };
+  resumeBtn.onclick = ()=> { if(activeIdx!=null) startTimer(activeIdx); };
+  closeBtn.onclick  = ()=>{
     if(activeIdx!=null){
       stopTimer(activeIdx);
       overlay.classList.add('hidden');
@@ -130,7 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // ─── INIT ───────────────────────────────────────────────────
+  // ─── INITIALIZE ─────────────────────────────────────────────
   render();
 });
-
