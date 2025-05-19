@@ -83,6 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <button data-i="${i}" data-act="start">▶</button>
           <button data-i="${i}" data-act="pause">⏸</button>
           <button data-i="${i}" data-act="reset">↺</button>
+          <button data-i="${i}" data-act="edit">✏️</button>
+          <button data-i="${i}" data-act="delete">🗑️</button>
         </div>`;
 
       // ─── Drag Events ─────────────────
@@ -122,15 +124,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Action buttons
     listEl.querySelectorAll('[data-act]').forEach(btn => {
-      const i = +btn.dataset.i, act = btn.dataset.act;
+      const i = +btn.dataset.i;
+      const act = btn.dataset.act;
       btn.onclick = () => {
-        if (act === 'start') openModal(i);
-        if (act === 'pause') stopTimer(i);
-        if (act === 'reset') {
-          stopTimer(i);
-          tasks[i].time = 0;
-          saveTasks();
-          render();
+        switch (act) {
+          case 'start':
+            openModal(i);
+            break;
+          case 'pause':
+            stopTimer(i);
+            break;
+          case 'reset':
+            stopTimer(i);
+            tasks[i].time = 0;
+            saveTasks();
+            render();
+            break;
+          case 'edit':
+            const newName = prompt("Edit task name:", tasks[i].name);
+            if (newName && newName.trim()) {
+              tasks[i].name = newName.trim();
+              saveTasks();
+              render();
+            }
+            break;
+          case 'delete':
+            if (confirm("Are you sure you want to delete this task?")) {
+              stopTimer(i);
+              tasks.splice(i, 1);
+              saveTasks();
+              render();
+            }
+            break;
         }
       };
     });
