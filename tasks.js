@@ -1,232 +1,193 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // ─── THEME LOGIC ─────────────────────────────────────────────
-  const themes = {
-    light:   {'--bg-color':'#ffffff','--nav-bg':'#84dcc6','--card-bg':'#f5fff5','--primary':'#ffa69e','--accent':'#ffdab9','--text-color':'#333'},
-    dark:    {'--bg-color':'#121212','--nav-bg':'#1f1f1f','--card-bg':'#1e1e1e','--primary':'#bb86fc','--accent':'#03dac6','--text-color':'#fff'},
-    ocean:   {'--bg-color':'#e0f7fa','--nav-bg':'#006064','--card-bg':'#b2ebf2','--primary':'#004d40','--accent':'#ffab00','--text-color':'#004d40'},
-    sunset:  {'--bg-color':'#fff3e0','--nav-bg':'#fb8c00','--card-bg':'#ffe0b2','--primary':'#d84315','--accent':'#8e24aa','--text-color':'#4e342e'},
-    midnight:{'--bg-color':'#2f2f3e','--nav-bg':'#1b1b2f','--card-bg':'#3a3a5c','--primary':'#8c9eff','--accent':'#ff4081','--text-color':'#e0e0e0'},
-  };
+const inputEl = document.querySelector('#taskInput');
+const addBtn = document.querySelector('#addTask');
+const listEl = document.querySelector('#taskList');
 
-  const selector = document.getElementById('themeSelector');
+let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
-  function applyTheme(name) {
-    const theme = themes[name] || themes.light;
-    Object.entries(theme).forEach(([key, value]) =>
-      document.documentElement.style.setProperty(key, value)
-    );
-    localStorage.setItem('yp-theme', name);
-    if (selector) selector.value = name;
-  }
+function saveTasks() {
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+}
 
-  const savedTheme = localStorage.getItem('yp-theme') || 'light';
-  applyTheme(savedTheme);
-  if (selector) {
-    selector.value = savedTheme;
-    selector.addEventListener('change', () => applyTheme(selector.value));
-  }
+function fmtMS(ms) {
+  const m = Math.floor(ms / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
 
-  // ─── HELPERS ──────────────────────────────────────────────────
-  const fmtMS = sec => {
-    const m = String(Math.floor(sec / 60)).padStart(2, '0'),
-          s = String(sec % 60).padStart(2, '0');
-    return `${m}:${s}`;
-  };
+function cutText(t) {
+  return `<s>${t}</s>`;
+}
 
-  const cutText = str => {
-    if (str.length <= 8) return str;
-    const c = Math.floor(str.length / 4);
-    return str.slice(0, c) + '…' + str.slice(-c);
-  };
+function render() {
+  listEl.innerHTML = '';
+  tasks.forEach((t, i) => {
+    const li = document.createElement('li');
+    li.className = 'task-card' + (t.done ? ' completed' : '');
+    li.setAttribute('draggable', true);
+    li.dataset.index = i;
 
-  // ─── STATE & DOM REFS ────────────────────────────────────────
-  let tasks = JSON.parse(localStorage.getItem('yp-tasks') || '[]');
-  tasks.forEach(t => t.intervalId = null);
-  let activeIdx = null;
-  let dragStartIndex = null;
+    const tagHTML = (t.tags || []).map(tag =>
+      `<span class="tag">${tag}</span>`).join(" ");
 
-  const listEl    = document.getElementById('list');
-  const addBtn    = document.getElementById('addBtn');
-  const inputEl   = document.getElementById('newTask');
-  const overlay   = document.getElementById('overlay');
-  const modalName = document.getElementById('modalName');
-  const modalTime = document.getElementById('modalTimer');
-  const pauseBtn  = document.getElementById('pauseBtn');
-  const resumeBtn = document.getElementById('resumeBtn');
-  const closeBtn  = document.getElementById('closeBtn');
+    const subtaskHTML = (t.subtasks || []).map((sub, si) =>
+      `<li><label>
+        <input type="checkbox" data-task="${i}" data-sub="${si}" ${sub.done ? 'checked' : ''}>
+        ${sub.done ? '<s>' + sub.name + '</s>' : sub.name}
+      </label></li>`).join("");
 
-  function saveTasks() {
-    const copy = tasks.map(t => ({
-      name: t.name,
-      time: t.time,
-      done: t.done
-    }));
-    localStorage.setItem('yp-tasks', JSON.stringify(copy));
-  }
+    li.innerHTML = `
+      <div class="task-info">
+        <input type="checkbox" data-i="${i}" ${t.done ? 'checked' : ''}>
+        <span class="name">${t.done ? cutText(t.name) : t.name}</span>
+        <span class="timer">${fmtMS(t.time || 0)}</span>
+        <span class="due">${t.due ? `⏰ ${t.due}` : ''}</span>
+        <div class="tags">${tagHTML}</div>
+      </div>
+      <ul class="subtasks">${subtaskHTML}</ul>
+      <div class="actions">
+        <button data-i="${i}" data-act="start">▶</button>
+        <button data-i="${i}" data-act="pause">⏸</button>
+        <button data-i="${i}" data-act="reset">↺</button>
+        <button data-i="${i}" data-act="edit">✏️</button>
+        <button data-i="${i}" data-act="delete">🗑️</button>
+      </div>
+    `;
 
-  // ─── RENDER & BIND ───────────────────────────────────────────
-  function render() {
-    listEl.innerHTML = '';
-    tasks.forEach((t, i) => {
-      const li = document.createElement('li');
-      li.className = 'task-card' + (t.done ? ' completed' : '');
-      li.setAttribute('draggable', true);
-      li.dataset.index = i;
+    listEl.appendChild(li);
+  });
 
-      li.innerHTML = `
-        <div class="task-info">
-          <input type="checkbox" data-i="${i}" ${t.done ? 'checked' : ''}>
-          <span class="name">${t.done ? cutText(t.name) : t.name}</span>
-          <span class="timer">${fmtMS(t.time)}</span>
-        </div>
-        <div class="actions">
-          <button data-i="${i}" data-act="start">▶</button>
-          <button data-i="${i}" data-act="pause">⏸</button>
-          <button data-i="${i}" data-act="reset">↺</button>
-          <button data-i="${i}" data-act="edit">✏️</button>
-          <button data-i="${i}" data-act="delete">🗑️</button>
-        </div>`;
+  // Main checkbox toggle
+  listEl.querySelectorAll('input[type=checkbox][data-i]').forEach(cb => {
+    cb.onchange = () => {
+      const i = +cb.dataset.i;
+      stopTimer(i);
+      tasks[i].done = cb.checked;
+      saveTasks();
+      render();
+    };
+  });
 
-      // ─── Drag Events ─────────────────
-      li.addEventListener('dragstart', e => {
-        dragStartIndex = i;
-        li.classList.add('dragging');
-      });
+  // Subtask checkbox toggle
+  listEl.querySelectorAll('input[type=checkbox][data-sub]').forEach(cb => {
+    cb.onchange = () => {
+      const i = +cb.dataset.task;
+      const si = +cb.dataset.sub;
+      tasks[i].subtasks[si].done = cb.checked;
+      saveTasks();
+      render();
+    };
+  });
 
-      li.addEventListener('dragend', () => {
-        li.classList.remove('dragging');
-      });
+  // Buttons
+  listEl.querySelectorAll('button').forEach(btn => {
+    const i = +btn.dataset.i;
+    const action = btn.dataset.act;
 
-      li.addEventListener('dragover', e => {
-        e.preventDefault();
-        li.classList.add('drag-over');
-      });
+    btn.onclick = () => {
+      switch (action) {
+        case 'start':
+          if (!tasks[i].intervalId) {
+            tasks[i].intervalId = setInterval(() => {
+              tasks[i].time += 1000;
+              saveTasks();
+              render();
+            }, 1000);
+          }
+          break;
 
-      li.addEventListener('dragleave', () => {
-        li.classList.remove('drag-over');
-      });
+        case 'pause':
+          stopTimer(i);
+          break;
 
-      li.addEventListener('drop', e => {
-        e.preventDefault();
-        li.classList.remove('drag-over');
-        const from = dragStartIndex;
-        const to = +li.dataset.index;
-        if (from !== to) {
-          const moved = tasks.splice(from, 1)[0];
-          tasks.splice(to, 0, moved);
+        case 'reset':
+          stopTimer(i);
+          tasks[i].time = 0;
           saveTasks();
           render();
-        }
-      });
+          break;
 
-      listEl.appendChild(li);
-    });
+        case 'edit':
+          const newName = prompt("Edit task name:", tasks[i].name);
+          if (newName !== null) tasks[i].name = newName;
 
-    // Action buttons
-    listEl.querySelectorAll('[data-act]').forEach(btn => {
-      const i = +btn.dataset.i;
-      const act = btn.dataset.act;
-      btn.onclick = () => {
-        switch (act) {
-          case 'start':
-            openModal(i);
-            break;
-          case 'pause':
-            stopTimer(i);
-            break;
-          case 'reset':
-            stopTimer(i);
-            tasks[i].time = 0;
-            saveTasks();
-            render();
-            break;
-          case 'edit':
-            const newName = prompt("Edit task name:", tasks[i].name);
-            if (newName && newName.trim()) {
-              tasks[i].name = newName.trim();
-              saveTasks();
-              render();
-            }
-            break;
-          case 'delete':
-            if (confirm("Are you sure you want to delete this task?")) {
-              stopTimer(i);
-              tasks.splice(i, 1);
-              saveTasks();
-              render();
-            }
-            break;
-        }
-      };
-    });
+          const newDue = prompt("Edit due date (YYYY-MM-DD):", tasks[i].due || '');
+          if (newDue !== null) tasks[i].due = newDue;
 
-    // Checkbox toggles
-    listEl.querySelectorAll('input[type=checkbox]').forEach(cb => {
-      cb.onchange = () => {
-        const i = +cb.dataset.i;
-        stopTimer(i);
-        tasks[i].done = cb.checked;
-        saveTasks();
-        render();
-      };
-    });
-  }
+          const newTags = prompt("Edit tags (comma-separated):", tasks[i].tags?.join(",") || '');
+          if (newTags !== null)
+            tasks[i].tags = newTags.split(',').map(t => t.trim()).filter(Boolean);
 
-  // ─── ADD NEW TASK ────────────────────────────────────────────
-  addBtn.onclick = () => {
-    const name = inputEl.value.trim();
-    if (!name) return;
-    tasks.push({ name, time: 0, done: false, intervalId: null });
-    saveTasks();
-    inputEl.value = '';
-    render();
-  };
+          const newSubtasks = prompt("Edit subtasks (comma-separated):", tasks[i].subtasks?.map(s => s.name).join(",") || '');
+          if (newSubtasks !== null) {
+            tasks[i].subtasks = newSubtasks.split(",").map(s => ({ name: s.trim(), done: false }));
+          }
 
-  // ─── MODAL & TIMER ───────────────────────────────────────────
-  function openModal(i) {
-    if (tasks[i].done) return;
-    activeIdx = i;
-    modalName.textContent = tasks[i].name;
-    modalTime.textContent = fmtMS(tasks[i].time);
-    overlay.classList.remove('hidden');
-    startTimer(i);
-  }
+          saveTasks();
+          render();
+          break;
 
-  function startTimer(i) {
-    stopTimer(i);
-    tasks[i].intervalId = setInterval(() => {
-      tasks[i].time++;
-      modalTime.textContent = fmtMS(tasks[i].time);
-      const el = document.querySelector(`.task-card:nth-child(${i+1}) .timer`);
-      if (el) el.textContent = fmtMS(tasks[i].time);
-    }, 1000);
-  }
+        case 'delete':
+          stopTimer(i);
+          tasks.splice(i, 1);
+          saveTasks();
+          render();
+          break;
+      }
+    };
+  });
 
-  function stopTimer(i) {
-    if (tasks[i]?.intervalId != null) {
-      clearInterval(tasks[i].intervalId);
-      tasks[i].intervalId = null;
+  // Drag & drop
+  listEl.querySelectorAll('li').forEach(item => {
+    item.ondragstart = e => e.dataTransfer.setData("text/plain", item.dataset.index);
+    item.ondragover = e => e.preventDefault();
+    item.ondrop = e => {
+      e.preventDefault();
+      const from = +e.dataTransfer.getData("text/plain");
+      const to = +item.dataset.index;
+      const [moved] = tasks.splice(from, 1);
+      tasks.splice(to, 0, moved);
       saveTasks();
-    }
+      render();
+    };
+  });
+}
+
+function stopTimer(i) {
+  if (tasks[i].intervalId) {
+    clearInterval(tasks[i].intervalId);
+    tasks[i].intervalId = null;
+  }
+}
+
+addBtn.onclick = () => {
+  const name = inputEl.value.trim();
+  if (!name) return;
+
+  const due = prompt("Enter due date (YYYY-MM-DD):", "");
+  const tags = prompt("Add tags (comma separated):", "")
+                 .split(",").map(t => t.trim()).filter(Boolean);
+  const subtasks = [];
+
+  const subStr = prompt("Add subtasks (comma separated):", "");
+  if (subStr) {
+    subStr.split(",").forEach(st => {
+      if (st.trim()) subtasks.push({ name: st.trim(), done: false });
+    });
   }
 
-  // ─── MODAL CONTROLS ─────────────────────────────────────────
-  pauseBtn.onclick = () => {
-    if (activeIdx != null) stopTimer(activeIdx);
-  };
+  tasks.push({
+    name,
+    time: 0,
+    done: false,
+    intervalId: null,
+    due,
+    tags,
+    subtasks
+  });
 
-  resumeBtn.onclick = () => {
-    if (activeIdx != null) startTimer(activeIdx);
-  };
-
-  closeBtn.onclick = () => {
-    if (activeIdx != null) {
-      stopTimer(activeIdx);
-      overlay.classList.add('hidden');
-      activeIdx = null;
-    }
-  };
-
-  // ─── INITIALIZE ─────────────────────────────────────────────
+  saveTasks();
+  inputEl.value = '';
   render();
-});
+};
+
+render();
