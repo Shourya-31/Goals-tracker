@@ -1,161 +1,137 @@
-// ——— Helpers —————————————————————————
+document.addEventListener('DOMContentLoaded', () => {
+  // ——— Helpers —————————————————————————
+  const fmtMS = sec => {
+    const m = String(Math.floor(sec/60)).padStart(2,'0');
+    const s = String(sec%60).padStart(2,'0');
+    return `${m}:${s}`;
+  };
+  const cutText = str => {
+    if (str.length <= 8) return str;
+    const c = Math.floor(str.length/4);
+    return str.slice(0,c) + '…' + str.slice(-c);
+  };
 
-function fmtMS(seconds) {
-  const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-  const s = String(seconds % 60).padStart(2, '0');
-  return `${m}:${s}`;
-}
+  // ——— State & DOM Refs ————————————————————
+  let tasks = [];
+  let activeIdx = null;
 
-// Cut text from the middle: show first & last chunks
-function cutText(str) {
-  const len = str.length;
-  if (len <= 8) return str;
-  const chunk = Math.floor(len / 4);
-  return str.slice(0, chunk) + '…' + str.slice(len - chunk);
-}
+  const listEl    = document.getElementById('list');
+  const addBtn    = document.getElementById('addBtn');
+  const inputEl   = document.getElementById('newTask');
+  const overlay   = document.getElementById('overlay');
+  const modalName = document.getElementById('modalName');
+  const modalTime = document.getElementById('modalTimer');
+  const pauseBtn  = document.getElementById('pauseBtn');
+  const closeBtn  = document.getElementById('closeBtn');
 
-// ——— State & DOM Refs ——————————————————
-
-let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-const listEl     = document.getElementById('tasksList');
-const addBtn     = document.getElementById('addTaskBtn');
-const inputEl    = document.getElementById('newTask');
-
-// Overlay & modal
-const overlay    = document.getElementById('overlay');
-const modalName  = document.getElementById('modalTaskName');
-const modalTimer = document.getElementById('modalTimer');
-const btnPause   = document.getElementById('modalPause');
-const btnClose   = document.getElementById('modalClose');
-
-let activeTask = null;  // currently modal‐active task
-
-// ——— Persistence —————————————————————
-
-function save() {
-  localStorage.setItem('tasks', JSON.stringify(tasks));
-}
-
-// ——— Rendering ——————————————————————
-
-function render() {
-  listEl.innerHTML = '';
-  tasks.forEach((t, idx) => {
-    const li = document.createElement('li');
-    li.className = 'task-card';
-    if (t.done) li.classList.add('completed');
-    li.innerHTML = `
-      <div class="task-info">
-        <input type="checkbox" ${t.done ? 'checked' : ''} data-i="${idx}"/>
-        <span class="name">${t.done ? cutText(t.name) : t.name}</span>
-        <span class="timer">${fmtMS(t.time)}</span>
-      </div>
-      <div class="task-actions">
-        <button class="start" data-i="${idx}">▶</button>
-        <button class="pause" data-i="${idx}">⏸</button>
-        <button class="reset" data-i="${idx}">↺</button>
-      </div>
-    `;
-    listEl.appendChild(li);
-  });
-  attachEvents();
-}
-
-// ——— Event Hooks —————————————————————
-
-function attachEvents() {
-  // Checkbox: complete
-  listEl.querySelectorAll('input[type=checkbox]').forEach(cb => {
-    cb.onchange = () => {
-      const i = +cb.dataset.i;
-      // stop timer
-      stopTimer(tasks[i]);
-      tasks[i].done = cb.checked;
-      if (cb.checked) {
-        tasks[i].time = tasks[i].time;  // freeze
-      }
-      save();
-      render();
-    };
-  });
-
-  // Start button → open modal + start timer
-  listEl.querySelectorAll('button.start').forEach(btn => {
-    btn.onclick = () => {
-      const t = tasks[btn.dataset.i];
-      if (t.done) return;
-      openModal(t);
-    };
-  });
-  // Pause & Reset inside list (in‐line)
-  listEl.querySelectorAll('button.pause').forEach(btn => {
-    btn.onclick = () => stopTimer(tasks[btn.dataset.i]);
-  });
-  listEl.querySelectorAll('button.reset').forEach(btn => {
-    btn.onclick = () => {
-      const t = tasks[btn.dataset.i];
-      stopTimer(t);
-      t.time = 0;
-      save();
-      render();
-    };
-  });
-}
-
-// ——— Modal Logic —————————————————————
-
-function openModal(task) {
-  activeTask = task;
-  modalName.textContent = task.name;
-  modalTimer.textContent = fmtMS(task.time);
-  overlay.classList.remove('hidden');
-  startTimer(task, modalTimer);
-}
-
-btnPause.onclick = () => {
-  if (activeTask) stopTimer(activeTask);
-};
-btnClose.onclick = () => {
-  if (activeTask) {
-    stopTimer(activeTask);
-    activeTask = null;
-  }
-  overlay.classList.add('hidden');
-};
-
-// ——— Timer Logic ——————————————————————
-
-function startTimer(task, displayEl) {
-  if (task.interval) return;
-  task.interval = setInterval(() => {
-    task.time++;
-    displayEl.textContent = fmtMS(task.time);
-    // also update list display if visible
-    const listTimers = listEl.querySelectorAll('.timer');
-    listTimers.forEach(el => {
-      const idx = +el.closest('li').querySelector('button.start').dataset.i;
-      if (tasks[idx] === task) el.textContent = fmtMS(task.time);
+  // ——— Render tasks ——————————————————————
+  function render() {
+    listEl.innerHTML = '';
+    tasks.forEach((t, i) => {
+      const li = document.createElement('li');
+      li.className = 'task-card' + (t.done ? ' completed' : '');
+      li.innerHTML = `
+        <div class="task-info">
+          <input type="checkbox" data-i="${i}" ${t.done?'checked':''}>
+          <span class="name">${t.done? cutText(t.name): t.name}</span>
+          <span class="timer">${fmtMS(t.time)}</span>
+        </div>
+        <div class="actions">
+          <button data-i="${i}" data-act="start">▶</button>
+          <button data-i="${i}" data-act="pause">⏸</button>
+          <button data-i="${i}" data-act="reset">↺</button>
+        </div>
+      `;
+      listEl.appendChild(li);
     });
-    save();
-  }, 1000);
-}
+    bindEvents();
+  }
 
-function stopTimer(task) {
-  clearInterval(task.interval);
-  task.interval = null;
-}
+  // ——— Bind card events ———————————————————
+  function bindEvents() {
+    // Complete checkbox
+    listEl.querySelectorAll('input[type=checkbox]').forEach(cb => {
+      cb.onchange = () => {
+        const i = +cb.dataset.i;
+        stopTimer(i);
+        tasks[i].done = cb.checked;
+        render();
+      };
+    });
+    // Start / Pause / Reset buttons
+    listEl.querySelectorAll('.actions button').forEach(btn => {
+      const i = +btn.dataset.i;
+      const act = btn.dataset.act;
+      btn.onclick = () => {
+        if (act === 'start') openModal(i);
+        if (act === 'pause') stopTimer(i);
+        if (act === 'reset') {
+          stopTimer(i);
+          tasks[i].time = 0;
+          render();
+        }
+      };
+    });
+  }
 
-// ——— Add New Task ————————————————————
+  // ——— Add new task —————————————————————
+  addBtn.onclick = () => {
+    const name = inputEl.value.trim();
+    if (!name) return;
+    tasks.push({ name, time: 0, done: false, intervalId: null });
+    inputEl.value = '';
+    render();
+  };
 
-addBtn.onclick = () => {
-  const name = inputEl.value.trim();
-  if (!name) return;
-  tasks.push({ name, time: 0, done: false, interval: null });
-  inputEl.value = '';
-  save();
+  // ——— Open focus‑mode modal —————————————————
+  function openModal(idx) {
+    if (tasks[idx].done) return;
+    activeIdx = idx;
+    modalName.textContent  = tasks[idx].name;
+    modalTime.textContent  = fmtMS(tasks[idx].time);
+    overlay.classList.remove('hidden');
+    startTimer(idx);
+  }
+
+  // ——— Timer logic ——————————————————————
+  function startTimer(idx) {
+    // Always clear any existing interval first:
+    if (tasks[idx].intervalId != null) {
+      clearInterval(tasks[idx].intervalId);
+    }
+    // Now start fresh
+    tasks[idx].intervalId = setInterval(() => {
+      tasks[idx].time++;
+      modalTime.textContent = fmtMS(tasks[idx].time);
+      // Sync list‐view timer if visible
+      const timerEls = listEl.querySelectorAll('.timer');
+      timerEls.forEach(el => {
+        const parent = el.closest('li');
+        const i = +parent.querySelector('button').dataset.i;
+        if (i === idx) el.textContent = fmtMS(tasks[i].time);
+      });
+    }, 1000);
+  }
+
+  function stopTimer(idx) {
+    if (tasks[idx].intervalId != null) {
+      clearInterval(tasks[idx].intervalId);
+      tasks[idx].intervalId = null;
+    }
+  }
+
+  // ——— Modal controls —————————————————————
+  pauseBtn.onclick = () => {
+    if (activeIdx != null) stopTimer(activeIdx);
+  };
+  closeBtn.onclick = () => {
+    if (activeIdx != null) {
+      stopTimer(activeIdx);
+      overlay.classList.add('hidden');
+      activeIdx = null;
+    }
+  };
+
+  // ——— Initialize ———————————————————————
   render();
-};
-
-// ——— Init —————————————————————————
-
-render();
+});
