@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YeolPumta+ Pomodoro</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="tasks.html">Tasks</a>
+    <a href="pomodoro.html" class="active">Pomodoro</a>
+  </nav>
+  <div class="container">
+    <h2>Pomodoro Session</h2>
+    <div id="pomodoroTimer" class="task-card">
+      <span id="pomodoroDisplay">25:00</span>
+      <div>
+        <button id="startPomo" class="btn-primary">Start</button>
+        <button id="stopPomo" class="btn-secondary">Pause</button>
+      </div>
+    </div>
+  </div>
+  <script src="pomodoro.js"></script>
+</body>
+</html>
