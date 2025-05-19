@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selector) selector.value = name;
   }
 
-  // init theme
   const savedTheme = localStorage.getItem('yp-theme') || 'light';
   applyTheme(savedTheme);
   if (selector) {
@@ -44,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let tasks = JSON.parse(localStorage.getItem('yp-tasks') || '[]');
   tasks.forEach(t => t.intervalId = null);
   let activeIdx = null;
+  let dragStartIndex = null;
 
   const listEl    = document.getElementById('list');
   const addBtn    = document.getElementById('addBtn');
@@ -70,6 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
     tasks.forEach((t, i) => {
       const li = document.createElement('li');
       li.className = 'task-card' + (t.done ? ' completed' : '');
+      li.setAttribute('draggable', true);
+      li.dataset.index = i;
+
       li.innerHTML = `
         <div class="task-info">
           <input type="checkbox" data-i="${i}" ${t.done ? 'checked' : ''}>
@@ -81,9 +84,43 @@ document.addEventListener('DOMContentLoaded', () => {
           <button data-i="${i}" data-act="pause">⏸</button>
           <button data-i="${i}" data-act="reset">↺</button>
         </div>`;
+
+      // ─── Drag Events ─────────────────
+      li.addEventListener('dragstart', e => {
+        dragStartIndex = i;
+        li.classList.add('dragging');
+      });
+
+      li.addEventListener('dragend', () => {
+        li.classList.remove('dragging');
+      });
+
+      li.addEventListener('dragover', e => {
+        e.preventDefault();
+        li.classList.add('drag-over');
+      });
+
+      li.addEventListener('dragleave', () => {
+        li.classList.remove('drag-over');
+      });
+
+      li.addEventListener('drop', e => {
+        e.preventDefault();
+        li.classList.remove('drag-over');
+        const from = dragStartIndex;
+        const to = +li.dataset.index;
+        if (from !== to) {
+          const moved = tasks.splice(from, 1)[0];
+          tasks.splice(to, 0, moved);
+          saveTasks();
+          render();
+        }
+      });
+
       listEl.appendChild(li);
     });
 
+    // Action buttons
     listEl.querySelectorAll('[data-act]').forEach(btn => {
       const i = +btn.dataset.i, act = btn.dataset.act;
       btn.onclick = () => {
@@ -98,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     });
 
+    // Checkbox toggles
     listEl.querySelectorAll('input[type=checkbox]').forEach(cb => {
       cb.onchange = () => {
         const i = +cb.dataset.i;
@@ -130,11 +168,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function startTimer(i) {
-    stopTimer(i); // ensure no double intervals
+    stopTimer(i);
     tasks[i].intervalId = setInterval(() => {
       tasks[i].time++;
       modalTime.textContent = fmtMS(tasks[i].time);
-      // sync main view timer
       const el = document.querySelector(`.task-card:nth-child(${i+1}) .timer`);
       if (el) el.textContent = fmtMS(tasks[i].time);
     }, 1000);
