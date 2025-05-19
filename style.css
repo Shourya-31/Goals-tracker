@@ -197,6 +197,15 @@ button {
   color: var(--text-color);
 }
 
+.drag-over {
+  border: 2px dashed var(--accent);
+  background-color: rgba(0,0,0,0.05);
+}
+.dragging {
+  opacity: 0.5;
+}
+
+
 /* ─── RESPONSIVE ─────────────────────────────────────────── */
 @media (max-width: 600px) {
   .task-card {
