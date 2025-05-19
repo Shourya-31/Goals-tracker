@@ -2,21 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Pomodoro Timer</title>
-  <!-- ONLY your Pomodoro stylesheet -->
+  <!-- site‑wide styles (nav, theme selector, etc.) -->
+  <link rel="stylesheet" href="style.css" />
+  <!-- pomodoro‑specific styles -->
   <link rel="stylesheet" href="pomodoro.css" />
 </head>
 <body>
+  <!-- ─── NAVBAR ─── -->
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="tasks.html">Tasks</a>
+    <a href="pomodoro.html" class="active">Pomodoro</a>
+    <span class="theme-switcher">
+      Theme:
+      <select id="themeSelector">
+        <option>Ocean</option>
+        <option>Forest</option>
+        <option>Sunset</option>
+      </select>
+    </span>
+  </nav>
+
   <main>
     <h2>Pomodoro Session</h2>
     <div id="session-label">Work</div>
 
     <div class="timer-circle">
       <svg width="200" height="200">
-        <!-- Background track -->
         <circle class="ring-track" cx="100" cy="100" r="90"></circle>
-        <!-- Progress indicator -->
         <circle class="ring-progress" cx="100" cy="100" r="90"></circle>
       </svg>
       <div id="timer-display">25:00</div>
@@ -39,7 +54,6 @@
     <div id="progress">Pomodoros Completed: 0 🍅</div>
   </main>
 
-  <!-- ONLY your Pomodoro script -->
   <script src="pomodoro.js"></script>
 </body>
 </html>
