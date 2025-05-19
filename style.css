@@ -203,11 +203,17 @@ button {
     flex-direction: column;
     align-items: flex-start;
   }
-  nav {
-    flex-wrap: wrap;
+  .task-info, .actions {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
   }
-  #taskModal {
-    width: 80vw;
-    height: auto;
+  .actions {
+    margin-top: 10px;
+  }
+  #header {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
   }
 }
