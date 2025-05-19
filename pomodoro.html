@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pomodoro Timer</title>
+  <!-- Link to the CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -14,17 +15,9 @@
     <div class="timer-circle">
       <svg width="200" height="200">
         <!-- Background track -->
-        <circle
-          class="ring-track"
-          cx="100" cy="100" r="90"
-        ></circle>
+        <circle class="ring-track" cx="100" cy="100" r="90"></circle>
         <!-- Progress indicator -->
-        <circle
-          class="ring-progress"
-          cx="100" cy="100" r="90"
-          stroke-dasharray="565.48"
-          stroke-dashoffset="0"
-        ></circle>
+        <circle class="ring-progress" cx="100" cy="100" r="90"></circle>
       </svg>
       <div id="timer-display">25:00</div>
     </div>
@@ -45,6 +38,8 @@
     <div class="quote">💪 Let’s focus and get it done!</div>
     <div id="progress">Pomodoros Completed: 0 🍅</div>
   </main>
+
+  <!-- Link to the JavaScript file (placed at the end) -->
   <script src="script.js"></script>
 </body>
 </html>
