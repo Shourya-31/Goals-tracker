@@ -10,11 +10,14 @@ let isRunning = false;
 let mode = 'work';
 
 const timerDisplay = document.getElementById("timer");
-const startBtn = document.getElementById("startBtn");
-const pauseBtn = document.getElementById("pauseBtn");
-const resetBtn = document.getElementById("resetBtn");
 const sessionLabel = document.getElementById("session-label");
 const progressDisplay = document.getElementById("progress");
+const ring = document.getElementById("progress-ring");
+const radius = 85;
+const circumference = 2 * Math.PI * radius;
+
+ring.style.strokeDasharray = circumference;
+ring.style.strokeDashoffset = 0;
 
 function updateTimerDisplay() {
   const minutes = String(Math.floor(timeLeft / 60)).padStart(2, "0");
@@ -22,25 +25,39 @@ function updateTimerDisplay() {
   timerDisplay.textContent = `${minutes}:${seconds}`;
 }
 
+function updateRing() {
+  const maxTime =
+    mode === "work"
+      ? workDuration
+      : mode === "shortBreak"
+      ? shortBreak
+      : longBreak;
+  const progress = timeLeft / maxTime;
+  ring.style.strokeDashoffset = circumference * (1 - progress);
+}
+
 function switchMode(newMode) {
   mode = newMode;
-  sessionLabel.textContent = newMode === "work" ? "Work" : newMode === "shortBreak" ? "Short Break" : "Long Break";
+  sessionLabel.textContent =
+    newMode === "work"
+      ? "Work"
+      : newMode === "shortBreak"
+      ? "Short Break"
+      : "Long Break";
 
-  if (mode === "work") {
-    timeLeft = workDuration;
-  } else if (mode === "shortBreak") {
-    timeLeft = shortBreak;
-  } else {
-    timeLeft = longBreak;
-  }
+  if (mode === "work") timeLeft = workDuration;
+  else if (mode === "shortBreak") timeLeft = shortBreak;
+  else timeLeft = longBreak;
 
   updateTimerDisplay();
+  updateRing();
 }
 
 function tick() {
   if (timeLeft > 0) {
     timeLeft--;
     updateTimerDisplay();
+    updateRing();
   } else {
     clearInterval(currentTimer);
     isRunning = false;
@@ -48,11 +65,7 @@ function tick() {
     if (mode === "work") {
       sessionCount++;
       updateProgress();
-      if (sessionCount % longBreakAfter === 0) {
-        switchMode("longBreak");
-      } else {
-        switchMode("shortBreak");
-      }
+      switchMode(sessionCount % longBreakAfter === 0 ? "longBreak" : "shortBreak");
     } else {
       switchMode("work");
     }
@@ -93,15 +106,15 @@ function applyCustomDurations() {
   resetTimer();
 }
 
-// Initial setup
+// Setup
 updateTimerDisplay();
 updateProgress();
+updateRing();
 
-startBtn.addEventListener("click", startTimer);
-pauseBtn.addEventListener("click", pauseTimer);
-resetBtn.addEventListener("click", resetTimer);
+document.getElementById("startBtn").addEventListener("click", startTimer);
+document.getElementById("pauseBtn").addEventListener("click", pauseTimer);
+document.getElementById("resetBtn").addEventListener("click", resetTimer);
 
-document.getElementById("workDuration").addEventListener("change", applyCustomDurations);
-document.getElementById("shortBreak").addEventListener("change", applyCustomDurations);
-document.getElementById("longBreak").addEventListener("change", applyCustomDurations);
-document.getElementById("longBreakAfter").addEventListener("change", applyCustomDurations);
+["workDuration", "shortBreak", "longBreak", "longBreakAfter"].forEach(id => {
+  document.getElementById(id).addEventListener("change", applyCustomDurations);
+});
