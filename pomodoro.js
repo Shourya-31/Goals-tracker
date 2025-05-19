@@ -1,120 +1,98 @@
+// durations in seconds
 let workDuration = 25 * 60;
 let shortBreak = 5 * 60;
 let longBreak = 15 * 60;
-let longBreakAfter = 4;
+let longAfter = 4;
 
-let sessionCount = 0;
-let currentTimer;
-let timeLeft = workDuration;
-let isRunning = false;
-let mode = 'work';
+let sessionCount = 0,
+    timeLeft = workDuration,
+    mode = 'work',
+    timerInterval = null;
 
-const timerDisplay = document.getElementById("timer");
-const sessionLabel = document.getElementById("session-label");
-const progressDisplay = document.getElementById("progress");
-const ring = document.getElementById("progress-ring");
-const radius = 85;
-const circumference = 2 * Math.PI * radius;
+const display = document.getElementById('timer-display'),
+      label   = document.getElementById('session-label'),
+      prog    = document.getElementById('progress'),
+      ring    = document.querySelector('.ring-progress'),
+      radius  = +ring.getAttribute('r'),
+      circ    = 2 * Math.PI * radius;
 
-ring.style.strokeDasharray = circumference;
+// prepare ring
+ring.style.strokeDasharray  = circ;
 ring.style.strokeDashoffset = 0;
 
-function updateTimerDisplay() {
-  const minutes = String(Math.floor(timeLeft / 60)).padStart(2, "0");
-  const seconds = String(timeLeft % 60).padStart(2, "0");
-  timerDisplay.textContent = `${minutes}:${seconds}`;
+function updateDisplay() {
+  let m = String(Math.floor(timeLeft / 60)).padStart(2,'0'),
+      s = String(timeLeft % 60).padStart(2,'0');
+  display.textContent = `${m}:${s}`;
+  // ring animation
+  let total = (mode==='work'?workDuration:(mode==='short'?shortBreak:longBreak));
+  ring.style.strokeDashoffset = circ * (1 - timeLeft/total);
 }
 
-function updateRing() {
-  const maxTime =
-    mode === "work"
-      ? workDuration
-      : mode === "shortBreak"
-      ? shortBreak
-      : longBreak;
-  const progress = timeLeft / maxTime;
-  ring.style.strokeDashoffset = circumference * (1 - progress);
-}
-
-function switchMode(newMode) {
-  mode = newMode;
-  sessionLabel.textContent =
-    newMode === "work"
-      ? "Work"
-      : newMode === "shortBreak"
-      ? "Short Break"
-      : "Long Break";
-
-  if (mode === "work") timeLeft = workDuration;
-  else if (mode === "shortBreak") timeLeft = shortBreak;
-  else timeLeft = longBreak;
-
-  updateTimerDisplay();
-  updateRing();
+function switchMode(to) {
+  mode = to;
+  label.textContent = to === 'work' ? 'Work'
+                      : to === 'short' ? 'Short Break'
+                      : 'Long Break';
+  timeLeft = to==='work'? workDuration
+           : to==='short'? shortBreak
+           : longBreak;
+  updateDisplay();
 }
 
 function tick() {
-  if (timeLeft > 0) {
+  if (timeLeft>0) {
     timeLeft--;
-    updateTimerDisplay();
-    updateRing();
+    updateDisplay();
   } else {
-    clearInterval(currentTimer);
-    isRunning = false;
+    clearInterval(timerInterval);
+    sessionCount += (mode==='work')?1:0;
+    prog.textContent = `Pomodoros Completed: ${sessionCount} 🍅`;
 
-    if (mode === "work") {
-      sessionCount++;
-      updateProgress();
-      switchMode(sessionCount % longBreakAfter === 0 ? "longBreak" : "shortBreak");
+    if (mode==='work') {
+      let next = (sessionCount % longAfter === 0)? 'long' : 'short';
+      switchMode(next);
     } else {
-      switchMode("work");
+      switchMode('work');
     }
-
     startTimer();
   }
 }
 
 function startTimer() {
-  if (!isRunning) {
-    currentTimer = setInterval(tick, 1000);
-    isRunning = true;
+  if (!timerInterval) {
+    timerInterval = setInterval(tick, 1000);
   }
 }
 
 function pauseTimer() {
-  clearInterval(currentTimer);
-  isRunning = false;
+  clearInterval(timerInterval);
+  timerInterval = null;
 }
 
 function resetTimer() {
-  clearInterval(currentTimer);
-  isRunning = false;
+  pauseTimer();
   sessionCount = 0;
-  switchMode("work");
-  updateProgress();
+  prog.textContent = `Pomodoros Completed: 0 🍅`;
+  switchMode('work');
 }
 
-function updateProgress() {
-  progressDisplay.innerHTML = `Pomodoros Completed: ${sessionCount} 🍅`;
-}
+// bind buttons
+document.getElementById('startBtn').onclick = startTimer;
+document.getElementById('pauseBtn').onclick = pauseTimer;
+document.getElementById('resetBtn').onclick = resetTimer;
 
-function applyCustomDurations() {
-  workDuration = parseInt(document.getElementById("workDuration").value) * 60;
-  shortBreak = parseInt(document.getElementById("shortBreak").value) * 60;
-  longBreak = parseInt(document.getElementById("longBreak").value) * 60;
-  longBreakAfter = parseInt(document.getElementById("longBreakAfter").value);
-  resetTimer();
-}
-
-// Setup
-updateTimerDisplay();
-updateProgress();
-updateRing();
-
-document.getElementById("startBtn").addEventListener("click", startTimer);
-document.getElementById("pauseBtn").addEventListener("click", pauseTimer);
-document.getElementById("resetBtn").addEventListener("click", resetTimer);
-
-["workDuration", "shortBreak", "longBreak", "longBreakAfter"].forEach(id => {
-  document.getElementById(id).addEventListener("change", applyCustomDurations);
+// custom durations
+['workDuration','shortBreak','longBreak','longBreakAfter']
+.forEach(id=>{
+  document.getElementById(id).onchange = ()=>{
+    workDuration   = +document.getElementById('workDuration').value * 60;
+    shortBreak     = +document.getElementById('shortBreak').value * 60;
+    longBreak      = +document.getElementById('longBreak').value * 60;
+    longAfter      = +document.getElementById('longBreakAfter').value;
+    resetTimer();
+  };
 });
+
+// initial render
+updateDisplay();
