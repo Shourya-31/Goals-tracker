@@ -63,9 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const i = +btn.dataset.i;
       const act = btn.dataset.act;
       btn.onclick = () => {
-        if (act === 'start') openModal(i);
-        if (act === 'pause') stopTimer(i);
-        if (act === 'reset') {
+        if (act === 'start') {
+          openModal(i);
+        } else if (act === 'pause') {
+          stopTimer(i);
+        } else if (act === 'reset') {
           stopTimer(i);
           tasks[i].time = 0;
           render();
@@ -95,17 +97,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ——— Timer logic ——————————————————————
   function startTimer(idx) {
-    // Always clear any existing interval first:
+    // clear any old interval to avoid duplicates
     if (tasks[idx].intervalId != null) {
       clearInterval(tasks[idx].intervalId);
     }
-    // Now start fresh
     tasks[idx].intervalId = setInterval(() => {
       tasks[idx].time++;
       modalTime.textContent = fmtMS(tasks[idx].time);
-      // Sync list‐view timer if visible
-      const timerEls = listEl.querySelectorAll('.timer');
-      timerEls.forEach(el => {
+      // sync list‐view timers
+      document.querySelectorAll('.timer').forEach(el => {
         const parent = el.closest('li');
         const i = +parent.querySelector('button').dataset.i;
         if (i === idx) el.textContent = fmtMS(tasks[i].time);
@@ -122,9 +122,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ——— Modal controls —————————————————————
   pauseBtn.onclick = () => {
+    // stop only; do NOT hide modal
     if (activeIdx != null) stopTimer(activeIdx);
   };
   closeBtn.onclick = () => {
+    // stop + hide modal
     if (activeIdx != null) {
       stopTimer(activeIdx);
       overlay.classList.add('hidden');
