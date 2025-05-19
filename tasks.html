@@ -32,17 +32,15 @@
     <ul id="list"></ul>
   </div>
   
-<input type="text" id="newTask" placeholder="New Task">
-<input type="date" id="dueDate" placeholder="Due Date">
-<input type="text" id="tags" placeholder="Tags (comma-separated)">
-<button id="addBtn">Add Task</button>
-<ul id="list"></ul>
 
 <!-- Modal & Controls -->
 <div id="overlay" class="hidden">
   <div id="modalContent">
     <h2 id="modalName"></h2>
     <div id="modalTimer">00:00</div>
+    <input type="date" id="dueDate" placeholder="dd-mm-yyyy">
+    <input type="text" id="tags" placeholder="Tags (comma-separated)">
+    <ul id="modalSubtasks"></ul> 
     <button id="pauseBtn">Pause</button>
     <button id="resumeBtn">Resume</button>
     <button id="closeBtn">Close</button>
