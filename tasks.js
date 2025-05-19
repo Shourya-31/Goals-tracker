@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   selector.addEventListener('change', () => applyTheme(selector.value));
   selector.value = localStorage.getItem('yp-theme') || 'light';
 
-  // Element references
+  // Elements
   const listEl = document.getElementById('list');
   const inputEl = document.getElementById('newTask');
   const dueEl = document.getElementById('dueDate');
@@ -36,12 +36,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeBtn = document.getElementById('closeBtn');
 
   let tasks = JSON.parse(localStorage.getItem('yp-tasks') || '[]');
-  tasks.forEach(t => t.intervalId = null);
-
+  let taskTimers = {}; // In-memory map of index to intervalId
   let activeIdx = null;
 
   function saveTasks() {
-    const saved = tasks.map(t => ({ ...t, intervalId: undefined }));
+    const saved = tasks.map(t => ({ ...t })); // strip intervalId
     localStorage.setItem('yp-tasks', JSON.stringify(saved));
   }
 
@@ -67,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <button data-i="${i}" data-act="reset">↺</button>
           <button data-i="${i}" data-act="delete">🗑️</button>
         </div>`;
-
       listEl.appendChild(li);
     });
 
@@ -103,23 +101,25 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function startTimer(i) {
-    stopTimer(i);
-    tasks[i].intervalId = setInterval(() => {
+    stopTimer(i); // stop if already running
+    taskTimers[i] = setInterval(() => {
       tasks[i].time++;
       modalTimer.textContent = fmtMS(tasks[i].time);
+
       const taskCard = listEl.children[i];
       if (taskCard) {
         const timerSpan = taskCard.querySelector('.timer');
         if (timerSpan) timerSpan.textContent = fmtMS(tasks[i].time);
       }
+
+      saveTasks();
     }, 1000);
   }
 
   function stopTimer(i) {
-    if (tasks[i]?.intervalId) {
-      clearInterval(tasks[i].intervalId);
-      tasks[i].intervalId = null;
-      saveTasks();
+    if (taskTimers[i]) {
+      clearInterval(taskTimers[i]);
+      delete taskTimers[i];
     }
   }
 
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!name) return;
     const tags = tagEl.value ? tagEl.value.split(',').map(t => t.trim()) : [];
     const due = dueEl.value ? new Date(dueEl.value).toISOString() : null;
-    tasks.push({ name, time: 0, done: false, tags, due, intervalId: null });
+    tasks.push({ name, time: 0, done: false, tags, due });
     inputEl.value = '';
     dueEl.value = '';
     tagEl.value = '';
