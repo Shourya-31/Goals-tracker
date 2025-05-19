@@ -3,172 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Task Timer App</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f0f4f8;
-      margin: 0;
-      padding: 20px;
-    }
-
-    h1 {
-      text-align: center;
-    }
-
-    #taskInput {
-      width: 70%;
-      padding: 10px;
-      font-size: 16px;
-    }
-
-    #addTask {
-      padding: 10px 15px;
-      font-size: 16px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    #addTask:hover {
-      background-color: #0056b3;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-      margin-top: 20px;
-    }
-
-    li {
-      background: white;
-      margin: 10px 0;
-      padding: 15px;
-      border-radius: 5px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .task-name {
-      font-size: 18px;
-    }
-
-    .timer {
-      font-family: monospace;
-      margin-left: 15px;
-      color: #666;
-    }
-
-    .btn {
-      padding: 6px 10px;
-      margin-left: 10px;
-      font-size: 14px;
-      border: none;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-
-    .start {
-      background-color: #28a745;
-      color: white;
-    }
-
-    .stop {
-      background-color: #dc3545;
-      color: white;
-    }
-  </style>
+  <title>YeolPumta + </title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Task Tracker with Timer</h1>
-  <div style="text-align: center;">
-    <input type="text" id="taskInput" placeholder="Enter new task..." />
-    <button id="addTask">Add Task</button>
-  </div>
-  <ul id="taskList"></ul>
+  <header>
+    <h1>YeolPumta + </h1>
+    <button id="exportCsv" title="Export completed tasks">📤 Export CSV</button>
+  </header>
 
-  <script>
-    const taskList = document.getElementById('taskList');
-    const addTaskBtn = document.getElementById('addTask');
-    const taskInput = document.getElementById('taskInput');
+  <main>
+    <section class="new-task">
+      <input type="text" id="taskInput" placeholder="What’s next?" />
+      <button id="addTask">＋ Add Task</button>
+    </section>
 
-    const timers = {};
+    <section class="stats">
+      <div>Total Time: <span id="totalTime">00:00:00</span></div>
+      <div>Pomodoro: <button id="startPomodoro">Start Pomodoro</button></div>
+    </section>
 
-    function formatTime(seconds) {
-      const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-      const secs = (seconds % 60).toString().padStart(2, '0');
-      return `${mins}:${secs}`;
-    }
+    <section class="charts">
+      <canvas id="dailyChart"></canvas>
+      <canvas id="weeklyChart"></canvas>
+    </section>
 
-    function createTaskElement(taskName) {
-      const li = document.createElement('li');
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
+    <ul id="taskList" class="task-list"></ul>
+  </main>
 
-      const span = document.createElement('span');
-      span.className = 'task-name';
-      span.textContent = taskName;
-
-      const timerDisplay = document.createElement('span');
-      timerDisplay.className = 'timer';
-      timerDisplay.textContent = '00:00';
-
-      const startBtn = document.createElement('button');
-      startBtn.textContent = 'Start';
-      startBtn.className = 'btn start';
-
-      const stopBtn = document.createElement('button');
-      stopBtn.textContent = 'Stop';
-      stopBtn.className = 'btn stop';
-
-      let seconds = 0;
-      let intervalId = null;
-
-      startBtn.addEventListener('click', () => {
-        if (!intervalId) {
-          intervalId = setInterval(() => {
-            seconds++;
-            timerDisplay.textContent = formatTime(seconds);
-          }, 1000);
-          timers[taskName] = intervalId;
-        }
-      });
-
-      stopBtn.addEventListener('click', () => {
-        clearInterval(intervalId);
-        intervalId = null;
-      });
-
-      const leftDiv = document.createElement('div');
-      leftDiv.className = 'left';
-      leftDiv.appendChild(checkbox);
-      leftDiv.appendChild(span);
-      leftDiv.appendChild(timerDisplay);
-
-      li.appendChild(leftDiv);
-      li.appendChild(startBtn);
-      li.appendChild(stopBtn);
-
-      return li;
-    }
-
-    addTaskBtn.addEventListener('click', () => {
-      const taskName = taskInput.value.trim();
-      if (taskName !== '') {
-        const taskElement = createTaskElement(taskName);
-        taskList.appendChild(taskElement);
-        taskInput.value = '';
-      }
-    });
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
