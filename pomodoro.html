@@ -1,21 +1,40 @@
-<main>
-  <h2>Pomodoro Session</h2>
-  <div id="session-label">Work</div>
-  <div id="timer">25:00</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pomodoro Timer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+    <h2>Pomodoro Session</h2>
+    <div id="session-label">Work</div>
 
-  <div class="controls">
-    <button id="startBtn">Start</button>
-    <button id="pauseBtn">Pause</button>
-    <button id="resetBtn">Reset</button>
-  </div>
+    <div class="circle">
+      <svg>
+        <circle cx="90" cy="90" r="85"></circle>
+        <circle cx="90" cy="90" r="85" id="progress-ring"></circle>
+      </svg>
+      <div id="timer">25:00</div>
+    </div>
 
-  <div class="custom-settings">
-    <label>Work: <input type="number" id="workDuration" value="25" /> min</label>
-    <label>Short Break: <input type="number" id="shortBreak" value="5" /> min</label>
-    <label>Long Break: <input type="number" id="longBreak" value="15" /> min</label>
-    <label>Long Break After: <input type="number" id="longBreakAfter" value="4" /></label>
-  </div>
+    <div class="controls">
+      <button id="startBtn">Start</button>
+      <button id="pauseBtn">Pause</button>
+      <button id="resetBtn">Reset</button>
+    </div>
 
-  <div class="quote">💪 Let’s focus and get it done!</div>
-  <div id="progress" class="progress">Pomodoros Completed: 0 🍅</div>
-</main>
+    <div class="custom-settings">
+      <label>Work: <input type="number" id="workDuration" value="25" /> min</label>
+      <label>Short Break: <input type="number" id="shortBreak" value="5" /> min</label>
+      <label>Long Break: <input type="number" id="longBreak" value="15" /> min</label>
+      <label>Long Break After: <input type="number" id="longBreakAfter" value="4" /></label>
+    </div>
+
+    <div class="quote">💪 Let’s focus and get it done!</div>
+    <div id="progress" class="progress">Pomodoros Completed: 0 🍅</div>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
