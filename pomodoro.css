@@ -1,3 +1,4 @@
+/* Base Styles */
 body {
   font-family: 'Segoe UI', sans-serif;
   background: #f7fff7;
@@ -5,6 +6,7 @@ body {
   text-align: center;
   margin: 0;
   padding: 0;
+  transition: background-color 0.4s ease;
 }
 
 nav {
@@ -27,27 +29,32 @@ main {
   padding: 40px 20px;
 }
 
+/* Timer Display */
 #timer {
   font-size: 5em;
   margin: 20px 0;
   color: #ff686b;
+  font-weight: bold;
 }
 
+/* Control Buttons */
 .controls button {
   font-size: 1em;
   padding: 10px 20px;
   margin: 5px;
   background: #ffa69e;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   color: white;
   cursor: pointer;
+  transition: background 0.3s;
 }
 
 .controls button:hover {
   background: #ff686b;
 }
 
+/* Input Form */
 .custom-settings {
   margin-top: 30px;
 }
@@ -55,17 +62,57 @@ main {
 .custom-settings label {
   display: block;
   margin: 10px 0;
+  font-weight: 500;
 }
 
+.custom-settings input[type="number"] {
+  width: 60px;
+  padding: 5px;
+  margin-left: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  text-align: center;
+  font-size: 1em;
+}
+
+/* Quote & Progress */
 .quote {
-  margin-top: 20px;
+  margin-top: 25px;
   font-style: italic;
   font-size: 1.2em;
   color: #444;
 }
 
 .progress {
-  margin-top: 15px;
+  margin-top: 20px;
   font-weight: bold;
   font-size: 1.1em;
+}
+
+/* Session Label */
+#sessionLabel {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #555;
+}
+
+/* Mode-Specific Backgrounds */
+.work-mode {
+  background-color: #fff0f0;
+}
+
+.short-mode {
+  background-color: #e0f7fa;
+}
+
+.long-mode {
+  background-color: #f3e5f5;
+}
+
+/* Transitions for theme change */
+body.work-mode,
+body.short-mode,
+body.long-mode {
+  transition: background-color 0.5s ease-in-out;
 }
