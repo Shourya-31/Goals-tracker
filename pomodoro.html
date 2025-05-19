@@ -4,54 +4,62 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Pomodoro Timer</title>
-  <!-- site‑wide styles (nav, theme selector, etc.) -->
+
+  <!-- Google Font -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- site‑wide styles -->
   <link rel="stylesheet" href="style.css" />
-  <!-- pomodoro‑specific styles -->
+  <!-- pomodoro-specific styles -->
   <link rel="stylesheet" href="pomodoro.css" />
 </head>
 <body>
-  <!-- ─── NAVBAR ─── -->
   <nav>
     <a href="index.html">Home</a>
     <a href="tasks.html">Tasks</a>
     <a href="pomodoro.html" class="active">Pomodoro</a>
-    <span class="theme-switcher">
+    <div class="theme-switcher">
       Theme:
       <select id="themeSelector">
         <option>Ocean</option>
         <option>Forest</option>
         <option>Sunset</option>
       </select>
-    </span>
+    </div>
   </nav>
 
   <main>
-    <h2>Pomodoro Session</h2>
-    <div id="session-label">Work</div>
+    <div class="card">
+      <h2>Pomodoro Session</h2>
+      <div id="session-label">Work</div>
 
-    <div class="timer-circle">
-      <svg width="200" height="200">
-        <circle class="ring-track" cx="100" cy="100" r="90"></circle>
-        <circle class="ring-progress" cx="100" cy="100" r="90"></circle>
-      </svg>
-      <div id="timer-display">25:00</div>
+      <div class="timer-circle">
+        <svg width="200" height="200">
+          <circle class="ring-track" cx="100" cy="100" r="90"></circle>
+          <circle class="ring-progress" cx="100" cy="100" r="90"></circle>
+        </svg>
+        <div id="timer-display">25:00</div>
+      </div>
+
+      <div class="controls">
+        <button id="startBtn">Start</button>
+        <button id="pauseBtn">Pause</button>
+        <button id="resetBtn">Reset</button>
+      </div>
+
+      <div class="settings">
+        <label>Work: <input type="number" id="workDuration" value="25" min="1" /> m</label>
+        <label>Short Break: <input type="number" id="shortBreak" value="5" min="1" /> m</label>
+        <label>Long Break: <input type="number" id="longBreak" value="15" min="1" /> m</label>
+        <label>Long After: <input type="number" id="longBreakAfter" value="4" min="1" /></label>
+      </div>
+
+      <div class="quote">💪 Let’s focus and get it done!</div>
+      <div id="progress">Pomodoros Completed: 0 🍅</div>
     </div>
-
-    <div class="controls">
-      <button id="startBtn">Start</button>
-      <button id="pauseBtn">Pause</button>
-      <button id="resetBtn">Reset</button>
-    </div>
-
-    <div class="settings">
-      <label>Work: <input type="number" id="workDuration" value="25" min="1" /> m</label>
-      <label>Short Break: <input type="number" id="shortBreak" value="5" min="1" /> m</label>
-      <label>Long Break: <input type="number" id="longBreak" value="15" min="1" /> m</label>
-      <label>Long After: <input type="number" id="longBreakAfter" value="4" min="1" /></label>
-    </div>
-
-    <div class="quote">💪 Let’s focus and get it done!</div>
-    <div id="progress">Pomodoros Completed: 0 🍅</div>
   </main>
 
   <script src="pomodoro.js"></script>
