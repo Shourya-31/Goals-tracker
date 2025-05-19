@@ -84,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
       listEl.appendChild(li);
     });
 
-    // action buttons
     listEl.querySelectorAll('[data-act]').forEach(btn => {
       const i = +btn.dataset.i, act = btn.dataset.act;
       btn.onclick = () => {
@@ -99,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     });
 
-    // checkbox toggles
     listEl.querySelectorAll('input[type=checkbox]').forEach(cb => {
       cb.onchange = () => {
         const i = +cb.dataset.i;
@@ -132,16 +130,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function startTimer(i) {
-    stopTimer(i);
+    stopTimer(i); // ensure no double intervals
     tasks[i].intervalId = setInterval(() => {
       tasks[i].time++;
       modalTime.textContent = fmtMS(tasks[i].time);
-      // sync list view
-      document.querySelectorAll('.timer').forEach(el => {
-        const li = el.closest('li');
-        const idx = +li.querySelector('[data-act]').dataset.i;
-        if (idx === i) el.textContent = fmtMS(tasks[i].time);
-      });
+      // sync main view timer
+      const el = document.querySelector(`.task-card:nth-child(${i+1}) .timer`);
+      if (el) el.textContent = fmtMS(tasks[i].time);
     }, 1000);
   }
 
