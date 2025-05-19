@@ -28,20 +28,19 @@
   <div class="container">
     <div class="new-task">
       <input type="text" id="newTask" placeholder="Enter a new task…" />
-      <input type="date" id="dueDate" placeholder="Due Date" />
+      <input type="date" id="dueDate" value="" />
       <input type="text" id="tags" placeholder="Tags (comma-separated)" />
       <button id="addBtn">Add Task</button>
     </div>
     <ul id="list"></ul>
   </div>
 
-  <!-- Task Focus Modal -->
+  <!-- Focus Modal -->
   <div id="overlay" class="hidden">
-    <div id="modalContent">
+    <div id="taskModal" class="modal-popup">
       <h2 id="modalName">Task Name</h2>
       <div id="modalTimer">00:00</div>
-      <ul id="modalSubtasks"></ul>
-      <div class="modal-buttons">
+      <div class="modal-controls">
         <button id="pauseBtn">Pause</button>
         <button id="resumeBtn">Resume</button>
         <button id="closeBtn">Close</button>
