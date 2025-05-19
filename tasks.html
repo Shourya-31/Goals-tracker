@@ -5,30 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>YeolPumta+ Tasks</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
   <nav>
-    <a href="index.html">Home</a>
-    <a href="tasks.html" class="active">Tasks</a>
-    <a href="pomodoro.html">Pomodoro</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="tasks.html" class="active">Tasks</a>
+      <a href="pomodoro.html">Pomodoro</a>
+    </div>
+    <div class="theme-controls">
+      <label for="themeSelector">Theme:</label>
+      <select id="themeSelector">
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+        <option value="ocean">Ocean</option>
+        <option value="sunset">Sunset</option>
+        <option value="midnight">Midnight</option>
+      </select>
+    </div>
   </nav>
+
   <div class="container">
-    <section class="new-task">
+    <div class="new-task">
       <input type="text" id="newTask" placeholder="Enter a new task…" />
-      <button id="addTaskBtn" class="btn-primary">Add Task</button>
-    </section>
-    <ul id="tasksList"></ul>
+      <button id="addBtn">Add Task</button>
+    </div>
+    <ul id="list"></ul>
   </div>
 
-  <!-- DARK OVERLAY + MODAL -->
+  <!-- Overlay + Focus Modal -->
   <div id="overlay" class="hidden">
     <div id="taskModal">
-      <h3 id="modalTaskName">Task Name</h3>
+      <h3 id="modalName">Task Name</h3>
       <div id="modalTimer">00:00</div>
       <div class="modal-buttons">
-        <button id="modalPause" class="btn-secondary">Pause</button>
-        <button id="modalClose" class="btn-secondary">Close</button>
+        <button id="pauseBtn">Pause</button>
+        <button id="closeBtn">Close</button>
       </div>
     </div>
   </div>
