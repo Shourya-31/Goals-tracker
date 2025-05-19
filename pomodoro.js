@@ -1,94 +1,107 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const timerDisplay = document.getElementById("timer");
-  const startBtn = document.getElementById("startBtn");
-  const pauseBtn = document.getElementById("pauseBtn");
-  const resetBtn = document.getElementById("resetBtn");
-  const sessionLabel = document.getElementById("sessionLabel");
-  const completedDisplay = document.getElementById("completedCount");
+let workDuration = 25 * 60;
+let shortBreak = 5 * 60;
+let longBreak = 15 * 60;
+let longBreakAfter = 4;
 
-  const workInput = document.getElementById("workInput");
-  const shortInput = document.getElementById("shortInput");
-  const longInput = document.getElementById("longInput");
-  const longBreakAfterInput = document.getElementById("longBreakAfterInput");
+let sessionCount = 0;
+let currentTimer;
+let timeLeft = workDuration;
+let isRunning = false;
+let mode = 'work';
 
-  let timer, timeLeft, isRunning = false;
-  let mode = "work"; // work | short | long
-  let pomodorosCompleted = 0;
-  let sessionCount = 0;
+const timerDisplay = document.getElementById("timer");
+const startBtn = document.getElementById("startBtn");
+const pauseBtn = document.getElementById("pauseBtn");
+const resetBtn = document.getElementById("resetBtn");
+const sessionLabel = document.getElementById("session-label");
+const progressDisplay = document.getElementById("progress");
 
-  function updateDisplay(seconds) {
-    const min = String(Math.floor(seconds / 60)).padStart(2, "0");
-    const sec = String(seconds % 60).padStart(2, "0");
-    timerDisplay.textContent = `${min}:${sec}`;
+function updateTimerDisplay() {
+  const minutes = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+  const seconds = String(timeLeft % 60).padStart(2, "0");
+  timerDisplay.textContent = `${minutes}:${seconds}`;
+}
+
+function switchMode(newMode) {
+  mode = newMode;
+  sessionLabel.textContent = newMode === "work" ? "Work" : newMode === "shortBreak" ? "Short Break" : "Long Break";
+
+  if (mode === "work") {
+    timeLeft = workDuration;
+  } else if (mode === "shortBreak") {
+    timeLeft = shortBreak;
+  } else {
+    timeLeft = longBreak;
   }
 
-  function getDuration(mode) {
-    if (mode === "work") return +workInput.value * 60;
-    if (mode === "short") return +shortInput.value * 60;
-    if (mode === "long") return +longInput.value * 60;
-  }
+  updateTimerDisplay();
+}
 
-  function switchMode(newMode) {
-    mode = newMode;
-    timeLeft = getDuration(mode);
-    sessionLabel.textContent = {
-      work: "Work",
-      short: "Short Break",
-      long: "Long Break"
-    }[mode];
-    updateDisplay(timeLeft);
-    setColors(mode);
-  }
-
-  function startTimer() {
-    if (isRunning) return;
-    isRunning = true;
-    timer = setInterval(() => {
-      timeLeft--;
-      updateDisplay(timeLeft);
-      if (timeLeft <= 0) {
-        clearInterval(timer);
-        isRunning = false;
-
-        if (mode === "work") {
-          pomodorosCompleted++;
-          sessionCount++;
-          completedDisplay.textContent = pomodorosCompleted;
-          if (sessionCount % +longBreakAfterInput.value === 0) {
-            switchMode("long");
-          } else {
-            switchMode("short");
-          }
-        } else {
-          switchMode("work");
-        }
-        startTimer();
-      }
-    }, 1000);
-  }
-
-  function pauseTimer() {
-    clearInterval(timer);
+function tick() {
+  if (timeLeft > 0) {
+    timeLeft--;
+    updateTimerDisplay();
+  } else {
+    clearInterval(currentTimer);
     isRunning = false;
-  }
 
-  function resetTimer() {
-    pauseTimer();
-    sessionCount = 0;
-    pomodorosCompleted = 0;
-    completedDisplay.textContent = "0";
-    switchMode("work");
-  }
+    if (mode === "work") {
+      sessionCount++;
+      updateProgress();
+      if (sessionCount % longBreakAfter === 0) {
+        switchMode("longBreak");
+      } else {
+        switchMode("shortBreak");
+      }
+    } else {
+      switchMode("work");
+    }
 
-  function setColors(mode) {
-    document.body.className = ""; // reset classes
-    document.body.classList.add(mode + "-mode");
+    startTimer();
   }
+}
 
-  // Init
+function startTimer() {
+  if (!isRunning) {
+    currentTimer = setInterval(tick, 1000);
+    isRunning = true;
+  }
+}
+
+function pauseTimer() {
+  clearInterval(currentTimer);
+  isRunning = false;
+}
+
+function resetTimer() {
+  clearInterval(currentTimer);
+  isRunning = false;
+  sessionCount = 0;
   switchMode("work");
+  updateProgress();
+}
 
-  startBtn.onclick = startTimer;
-  pauseBtn.onclick = pauseTimer;
-  resetBtn.onclick = resetTimer;
-});
+function updateProgress() {
+  progressDisplay.innerHTML = `Pomodoros Completed: ${sessionCount} 🍅`;
+}
+
+function applyCustomDurations() {
+  workDuration = parseInt(document.getElementById("workDuration").value) * 60;
+  shortBreak = parseInt(document.getElementById("shortBreak").value) * 60;
+  longBreak = parseInt(document.getElementById("longBreak").value) * 60;
+  longBreakAfter = parseInt(document.getElementById("longBreakAfter").value);
+  resetTimer();
+}
+
+// Initial setup
+updateTimerDisplay();
+updateProgress();
+
+startBtn.addEventListener("click", startTimer);
+pauseBtn.addEventListener("click", pauseTimer);
+resetBtn.addEventListener("click", resetTimer);
+
+document.getElementById("workDuration").addEventListener("change", applyCustomDurations);
+document.getElementById("shortBreak").addEventListener("change", applyCustomDurations);
+document.getElementById("longBreak").addEventListener("change", applyCustomDurations);
+document.getElementById("longBreakAfter").addEventListener("change", applyCustomDurations);
