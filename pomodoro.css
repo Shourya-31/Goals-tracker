@@ -1,0 +1,71 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f7fff7;
+  color: #333;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+nav {
+  background: #84dcc6;
+  padding: 10px;
+}
+
+nav a {
+  margin: 0 15px;
+  text-decoration: none;
+  color: #222;
+  font-weight: bold;
+}
+
+nav a.active {
+  text-decoration: underline;
+}
+
+main {
+  padding: 40px 20px;
+}
+
+#timer {
+  font-size: 5em;
+  margin: 20px 0;
+  color: #ff686b;
+}
+
+.controls button {
+  font-size: 1em;
+  padding: 10px 20px;
+  margin: 5px;
+  background: #ffa69e;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+}
+
+.controls button:hover {
+  background: #ff686b;
+}
+
+.custom-settings {
+  margin-top: 30px;
+}
+
+.custom-settings label {
+  display: block;
+  margin: 10px 0;
+}
+
+.quote {
+  margin-top: 20px;
+  font-style: italic;
+  font-size: 1.2em;
+  color: #444;
+}
+
+.progress {
+  margin-top: 15px;
+  font-weight: bold;
+  font-size: 1.1em;
+}
