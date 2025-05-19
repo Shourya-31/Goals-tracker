@@ -1,71 +1,14 @@
 :root {
-  --bg-page: #e9f5f2;
   --card-bg: #ffffff;
   --accent: #ff6b6b;
   --accent-light: #ff9a8b;
-  --text-primary: #333333;
   --text-secondary: #666666;
   --shadow-light: rgba(0, 0, 0, 0.05);
   --shadow-strong: rgba(0, 0, 0, 0.1);
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0; padding: 0;
-}
-
-body {
-  font-family: 'Poppins', sans-serif;
-  background: var(--bg-page);
-  color: var(--text-primary);
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-/* ─── NAVBAR ─── */
-nav {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-  background: linear-gradient(90deg, #5fdde5, #60c4e8);
-  padding: 1rem 2rem;
-  box-shadow: 0 2px 8px var(--shadow-strong);
-}
-nav a {
-  color: #fff; text-decoration: none;
-  font-weight: 600;
-  padding-bottom: 0.25rem;
-  position: relative;
-  transition: color 0.3s;
-}
-nav a:hover { color: #f0f0f0; }
-nav a.active {
-  color: #fff;
-}
-nav a.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0;
-  height: 3px; width: 100%;
-  background: #ffd23f;
-  border-radius: 2px;
-}
-.theme-switcher {
-  margin-left: auto;
-  color: #fff;
-  font-size: 0.9rem;
-}
-.theme-switcher select {
-  margin-left: 0.5rem;
-  padding: 0.3rem 0.6rem;
-  border-radius: 4px;
-  border: none;
-}
-
-/* ─── MAIN CARD ─── */
+/* ─── MAIN LAYOUT ─── */
 main {
-  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -88,13 +31,10 @@ main {
     0 8px 20px var(--shadow-light),
     0 12px 32px var(--shadow-strong);
 }
-
 .card h2 {
-  font-size: 1.8rem;
   margin-bottom: 0.25rem;
 }
 #session-label {
-  font-size: 1rem;
   color: var(--text-secondary);
   margin-bottom: 1.5rem;
 }
@@ -102,7 +42,8 @@ main {
 /* ─── CIRCULAR TIMER ─── */
 .timer-circle {
   position: relative;
-  width: 200px; height: 200px;
+  width: 200px;
+  height: 200px;
   margin: 0 auto 1.5rem;
 }
 .ring-track,
@@ -110,7 +51,9 @@ main {
   fill: none;
   stroke-width: 10;
 }
-.ring-track { stroke: #eee; }
+.ring-track {
+  stroke: #eee;
+}
 .ring-progress {
   stroke: var(--accent);
   transform: rotate(-90deg);
@@ -119,13 +62,14 @@ main {
 }
 #timer-display {
   position: absolute;
-  top: 50%; left: 50%;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
   font-size: 2.4rem;
   color: var(--accent);
 }
 
-/* ─── CONTROLS ─── */
+/* ─── BUTTONS ─── */
 .controls {
   display: flex;
   justify-content: center;
@@ -151,17 +95,16 @@ main {
   transform: translateY(0);
 }
 
-/* ─── SETTINGS ─── */
+/* ─── SETTINGS GRID ─── */
 .settings {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 0.75rem 1rem;
-  justify-content: center;
   margin-bottom: 1.5rem;
 }
 .settings label {
-  font-size: 0.95rem;
   color: var(--text-secondary);
+  font-size: 0.95rem;
 }
 .settings input {
   width: 3rem;
@@ -169,10 +112,9 @@ main {
   border: 1px solid #ddd;
   border-radius: 4px;
   text-align: center;
-  font-size: 1rem;
 }
 
-/* ─── FOOTER ─── */
+/* ─── FOOTER TEXT ─── */
 .quote {
   font-style: italic;
   color: var(--text-secondary);
