@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Pomodoro Timer</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -11,12 +11,22 @@
     <h2>Pomodoro Session</h2>
     <div id="session-label">Work</div>
 
-    <div class="circle">
-      <svg>
-        <circle cx="90" cy="90" r="85"></circle>
-        <circle cx="90" cy="90" r="85" id="progress-ring"></circle>
+    <div class="timer-circle">
+      <svg width="200" height="200">
+        <!-- Background track -->
+        <circle
+          class="ring-track"
+          cx="100" cy="100" r="90"
+        ></circle>
+        <!-- Progress indicator -->
+        <circle
+          class="ring-progress"
+          cx="100" cy="100" r="90"
+          stroke-dasharray="565.48"
+          stroke-dashoffset="0"
+        ></circle>
       </svg>
-      <div id="timer">25:00</div>
+      <div id="timer-display">25:00</div>
     </div>
 
     <div class="controls">
@@ -25,15 +35,15 @@
       <button id="resetBtn">Reset</button>
     </div>
 
-    <div class="custom-settings">
-      <label>Work: <input type="number" id="workDuration" value="25" /> min</label>
-      <label>Short Break: <input type="number" id="shortBreak" value="5" /> min</label>
-      <label>Long Break: <input type="number" id="longBreak" value="15" /> min</label>
-      <label>Long Break After: <input type="number" id="longBreakAfter" value="4" /></label>
+    <div class="settings">
+      <label>Work: <input type="number" id="workDuration" value="25" min="1" /> m</label>
+      <label>Short Break: <input type="number" id="shortBreak" value="5" min="1" /> m</label>
+      <label>Long Break: <input type="number" id="longBreak" value="15" min="1" /> m</label>
+      <label>Long After: <input type="number" id="longBreakAfter" value="4" min="1" /></label>
     </div>
 
     <div class="quote">💪 Let’s focus and get it done!</div>
-    <div id="progress" class="progress">Pomodoros Completed: 0 🍅</div>
+    <div id="progress">Pomodoros Completed: 0 🍅</div>
   </main>
   <script src="script.js"></script>
 </body>
