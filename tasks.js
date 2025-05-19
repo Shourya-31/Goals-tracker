@@ -1,20 +1,39 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // ——— Helpers —————————————————————————
+  // ─── THEME LOGIC ─────────────────────────────────────────────
+  const themes = {
+    light:   {'--bg-color':'#ffffff','--nav-bg':'#84dcc6','--card-bg':'#f5fff5','--primary':'#ffa69e','--accent':'#ffdab9','--text-color':'#333'},
+    dark:    {'--bg-color':'#121212','--nav-bg':'#1f1f1f','--card-bg':'#1e1e1e','--primary':'#bb86fc','--accent':'#03dac6','--text-color':'#fff'},
+    ocean:   {'--bg-color':'#e0f7fa','--nav-bg':'#006064','--card-bg':'#b2ebf2','--primary':'#004d40','--accent':'#ffab00','--text-color':'#004d40'},
+    sunset:  {'--bg-color':'#fff3e0','--nav-bg':'#fb8c00','--card-bg':'#ffe0b2','--primary':'#d84315','--accent':'#8e24aa','--text-color':'#4e342e'},
+    midnight:{'--bg-color':'#2f2f3e','--nav-bg':'#1b1b2f','--card-bg':'#3a3a5c','--primary':'#8c9eff','--accent':'#ff4081','--text-color':'#e0e0e0'},
+  };
+  const selector = document.getElementById('themeSelector');
+  function applyTheme(name) {
+    Object.entries(themes[name]).forEach(([k,v])=>
+      document.documentElement.style.setProperty(k,v)
+    );
+    localStorage.setItem('yp-theme', name);
+    selector.value = name;
+  }
+  const saved = localStorage.getItem('yp-theme') || 'light';
+  applyTheme(saved);
+  selector.onchange = () => applyTheme(selector.value);
+
+  // ─── HELPERS ──────────────────────────────────────────────────
   const fmtMS = sec => {
-    const m = String(Math.floor(sec/60)).padStart(2,'0');
-    const s = String(sec%60).padStart(2,'0');
+    const m = String(Math.floor(sec/60)).padStart(2,'0'),
+          s = String(sec%60).padStart(2,'0');
     return `${m}:${s}`;
   };
   const cutText = str => {
     if (str.length <= 8) return str;
     const c = Math.floor(str.length/4);
-    return str.slice(0,c) + '…' + str.slice(-c);
+    return str.slice(0,c)+'…'+str.slice(-c);
   };
 
-  // ——— State & DOM Refs ————————————————————
+  // ─── STATE & REFS ────────────────────────────────────────────
   let tasks = [];
   let activeIdx = null;
-
   const listEl    = document.getElementById('list');
   const addBtn    = document.getElementById('addBtn');
   const inputEl   = document.getElementById('newTask');
@@ -24,116 +43,94 @@ document.addEventListener('DOMContentLoaded', () => {
   const pauseBtn  = document.getElementById('pauseBtn');
   const closeBtn  = document.getElementById('closeBtn');
 
-  // ——— Render tasks ——————————————————————
+  // ─── RENDER & BIND ───────────────────────────────────────────
   function render() {
     listEl.innerHTML = '';
-    tasks.forEach((t, i) => {
+    tasks.forEach((t,i)=>{
       const li = document.createElement('li');
-      li.className = 'task-card' + (t.done ? ' completed' : '');
-      li.innerHTML = `
+      li.className = 'task-card'+(t.done?' completed':'');
+      li.innerHTML=`
         <div class="task-info">
           <input type="checkbox" data-i="${i}" ${t.done?'checked':''}>
-          <span class="name">${t.done? cutText(t.name): t.name}</span>
+          <span class="name">${t.done?cutText(t.name):t.name}</span>
           <span class="timer">${fmtMS(t.time)}</span>
         </div>
         <div class="actions">
           <button data-i="${i}" data-act="start">▶</button>
           <button data-i="${i}" data-act="pause">⏸</button>
           <button data-i="${i}" data-act="reset">↺</button>
-        </div>
-      `;
+        </div>`;
       listEl.appendChild(li);
     });
-    bindEvents();
-  }
-
-  // ——— Bind card events ———————————————————
-  function bindEvents() {
-    // Complete checkbox
-    listEl.querySelectorAll('input[type=checkbox]').forEach(cb => {
-      cb.onchange = () => {
+    // bind buttons
+    listEl.querySelectorAll('[data-act]').forEach(btn=>{
+      const i = +btn.dataset.i, act = btn.dataset.act;
+      btn.onclick = ()=>{
+        if(act==='start') openModal(i);
+        if(act==='pause') stopTimer(i);
+        if(act==='reset'){ stopTimer(i); tasks[i].time=0; render(); }
+      };
+    });
+    // bind checkboxes
+    listEl.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+      cb.onchange = ()=>{
         const i = +cb.dataset.i;
         stopTimer(i);
         tasks[i].done = cb.checked;
         render();
       };
     });
-    // Start / Pause / Reset buttons
-    listEl.querySelectorAll('.actions button').forEach(btn => {
-      const i = +btn.dataset.i;
-      const act = btn.dataset.act;
-      btn.onclick = () => {
-        if (act === 'start') {
-          openModal(i);
-        } else if (act === 'pause') {
-          stopTimer(i);
-        } else if (act === 'reset') {
-          stopTimer(i);
-          tasks[i].time = 0;
-          render();
-        }
-      };
-    });
   }
 
-  // ——— Add new task —————————————————————
-  addBtn.onclick = () => {
+  // ─── ADD NEW TASK ────────────────────────────────────────────
+  addBtn.onclick = ()=>{
     const name = inputEl.value.trim();
-    if (!name) return;
-    tasks.push({ name, time: 0, done: false, intervalId: null });
-    inputEl.value = '';
+    if(!name) return;
+    tasks.push({ name, time:0, done:false, intervalId:null });
+    inputEl.value='';
     render();
   };
 
-  // ——— Open focus‑mode modal —————————————————
-  function openModal(idx) {
-    if (tasks[idx].done) return;
-    activeIdx = idx;
-    modalName.textContent  = tasks[idx].name;
-    modalTime.textContent  = fmtMS(tasks[idx].time);
+  // ─── MODAL & TIMER ───────────────────────────────────────────
+  function openModal(i){
+    if(tasks[i].done) return;
+    activeIdx = i;
+    modalName.textContent = tasks[i].name;
+    modalTime.textContent = fmtMS(tasks[i].time);
     overlay.classList.remove('hidden');
-    startTimer(idx);
+    startTimer(i);
   }
-
-  // ——— Timer logic ——————————————————————
-  function startTimer(idx) {
-    // clear any old interval to avoid duplicates
-    if (tasks[idx].intervalId != null) {
-      clearInterval(tasks[idx].intervalId);
-    }
-    tasks[idx].intervalId = setInterval(() => {
-      tasks[idx].time++;
-      modalTime.textContent = fmtMS(tasks[idx].time);
-      // sync list‐view timers
-      document.querySelectorAll('.timer').forEach(el => {
-        const parent = el.closest('li');
-        const i = +parent.querySelector('button').dataset.i;
-        if (i === idx) el.textContent = fmtMS(tasks[i].time);
+  function startTimer(i){
+    stopTimer(i);
+    tasks[i].intervalId = setInterval(()=>{
+      tasks[i].time++;
+      modalTime.textContent = fmtMS(tasks[i].time);
+      // sync list timers
+      document.querySelectorAll('.timer').forEach(el=>{
+        const li = el.closest('li');
+        const idx = +li.querySelector('[data-act]').dataset.i;
+        if(idx===i) el.textContent = fmtMS(tasks[i].time);
       });
-    }, 1000);
+    },1000);
   }
-
-  function stopTimer(idx) {
-    if (tasks[idx].intervalId != null) {
-      clearInterval(tasks[idx].intervalId);
-      tasks[idx].intervalId = null;
+  function stopTimer(i){
+    if(tasks[i]?.intervalId!=null){
+      clearInterval(tasks[i].intervalId);
+      tasks[i].intervalId = null;
     }
   }
 
-  // ——— Modal controls —————————————————————
-  pauseBtn.onclick = () => {
-    // stop only; do NOT hide modal
-    if (activeIdx != null) stopTimer(activeIdx);
-  };
-  closeBtn.onclick = () => {
-    // stop + hide modal
-    if (activeIdx != null) {
+  // ─── MODAL CONTROLS ─────────────────────────────────────────
+  pauseBtn.onclick = ()=> { if(activeIdx!=null) stopTimer(activeIdx); };
+  closeBtn.onclick = ()=>{
+    if(activeIdx!=null){
       stopTimer(activeIdx);
       overlay.classList.add('hidden');
-      activeIdx = null;
+      activeIdx=null;
     }
   };
 
-  // ——— Initialize ———————————————————————
+  // ─── INIT ───────────────────────────────────────────────────
   render();
 });
+
