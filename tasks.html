@@ -11,24 +11,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 </head>
 <body>
-  <!-- at the very top of <body> in tasks.html -->
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  auth.onAuthStateChanged(user => {
-    if (!user) {
-      // if user is not logged in, send them to login.html
-      window.location = 'login.html';
-    }
-  });
-</script>
   <script>
     // Initialize Firebase (same config)
     const firebaseConfig = {
