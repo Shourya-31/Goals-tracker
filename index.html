@@ -1,21 +1,50 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Goals++ Home</title>
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 </head>
 <body>
-  <nav>
-    <a href="index.html" class="active">Home</a>
-    <a href="tasks.html">Tasks</a>
-    <a href="pomodoro.html">Pomodoro</a>
-  </nav>
-  <div class="container">
-    <h2>Welcome to Goals++</h2>
-    <p>Track your tasks, manage your time, and boost productivity with a soothing interface.</p>
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyA_ogA9sHin2gW9Wly-3COVawl1NOZSvdg",
+      authDomain: "goals-tracker-e8028.firebaseapp.com",
+      projectId: "goals-tracker-e8028",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Redirect unauthenticated users to login.html
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'login.html';
+      } else {
+        // User is signed in, show the content
+        document.getElementById("main").style.display = "block";
+      }
+    });
+  </script>
+
+  <!-- Default to hidden until auth state is known -->
+  <div id="main" style="display: none;">
+    <nav>
+      <div class="nav-links">
+        <a href="index.html" class="active">Home</a>
+        <a href="tasks.html">Tasks</a>
+        <a href="pomodoro.html">Pomodoro</a>
+      </div>
+    </nav>
+    <main>
+      <h1>Welcome to Goals++</h1>
+      <p>Track your tasks, manage your time, and boost productivity with a soothing interface.</p>
+    </main>
   </div>
 </body>
 </html>
- -->
