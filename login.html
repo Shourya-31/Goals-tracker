@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Goals++ Login</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <div class="login-container">
+    <h1>Welcome to Goals++</h1>
+    <button id="loginBtn">Sign in with Google</button>
+  </div>
+
+  <script>
+    // 1) Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      // …other config…
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    // 2) If already signed in, go to tasks
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        window.location = 'tasks.html';
+      }
+    });
+
+    // 3) On button click, sign in and then redirect
+    document.getElementById('loginBtn').onclick = () => {
+      auth.signInWithPopup(provider)
+        .then(() => window.location = 'tasks.html')
+        .catch(console.error);
+    };
+  </script>
+</body>
+</html>
