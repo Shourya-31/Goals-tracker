@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Goals++ Login</title>
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Firebase SDKs -->
+  <!-- 1) Load Firebase SDKs FIRST -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 </head>
@@ -17,29 +16,39 @@
   </div>
 
   <script>
-    // 1) Initialize Firebase
+    // 2) Your Firebase config — replace with YOUR values
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      // …other config…
+      apiKey: "AIzaSyA_ogA9sHin2gW9Wly-3COVawl1NOZSvdg",
+      authDomain: "goals-tracker-e8028.firebaseapp.com",
+      projectId: "goals-tracker-e8028",
+      // storageBucket, messagingSenderId, appId if you have them
     };
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+
+    // 3) Get the auth objects
+    const auth     = firebase.auth();
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    // 2) If already signed in, go to tasks
+    // 4) If already signed in, go straight to tasks.html
     auth.onAuthStateChanged(user => {
       if (user) {
         window.location = 'tasks.html';
       }
     });
 
-    // 3) On button click, sign in and then redirect
-    document.getElementById('loginBtn').onclick = () => {
+    // 5) On button click, trigger Google Sign-In
+    document.getElementById('loginBtn').addEventListener('click', () => {
       auth.signInWithPopup(provider)
-        .then(() => window.location = 'tasks.html')
-        .catch(console.error);
-    };
+        .then(result => {
+          // Signed in successfully
+          console.log("Signed in:", result.user.email);
+          window.location = 'tasks.html';
+        })
+        .catch(err => {
+          console.error("Sign-in error:", err);
+          alert("Failed to sign in: " + err.message);
+        });
+    });
   </script>
 </body>
 </html>
