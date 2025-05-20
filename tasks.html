@@ -5,8 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Goals++ Tasks</title>
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 </head>
 <body>
+  <script>
+    // Initialize Firebase (same config)
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      // …other config…
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // If not signed in, redirect to login
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location = 'login.html';
+      }
+    });
+  </script>
+
   <nav>
     <div class="nav-links">
       <a href="index.html">Home</a>
@@ -23,9 +45,13 @@
         <option value="midnight">Midnight</option>
       </select>
     </div>
+    <div class="auth-controls">
+      <button id="logoutBtn">Log out</button>
+    </div>
   </nav>
 
   <div class="container">
+    <!-- your existing new-task inputs and task list -->
     <div class="new-task">
       <input type="text" id="newTask" placeholder="Enter a new task…" />
       <input type="date" id="dueDate" />
@@ -35,7 +61,7 @@
     <ul id="list"></ul>
   </div>
 
-  <!-- Focus Modal -->
+  <!-- Modal popup markup unchanged… -->
   <div id="overlay" class="hidden">
     <div id="taskModal" class="modal-popup">
       <h2 id="modalName">Task Name</h2>
@@ -49,5 +75,11 @@
   </div>
 
   <script src="tasks.js"></script>
+  <script>
+    // Log out button
+    document.getElementById('logoutBtn').onclick = () => auth.signOut().then(() => {
+      window.location = 'login.html';
+    });
+  </script>
 </body>
 </html>
