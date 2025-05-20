@@ -3,52 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Goals++ Login</title>
+  <title>Goals++ Home</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- 1) Load Firebase SDKs FIRST -->
+  
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-</head>
-<body>
-  <div class="login-container">
-    <h1>Welcome to Goals++</h1>
-    <button id="loginBtn">Sign in with Google</button>
-  </div>
 
   <script>
-    // 2) Your Firebase config — replace with YOUR values
+    // Initialize Firebase (replace with your config)
     const firebaseConfig = {
       apiKey: "AIzaSyA_ogA9sHin2gW9Wly-3COVawl1NOZSvdg",
       authDomain: "goals-tracker-e8028.firebaseapp.com",
       projectId: "goals-tracker-e8028",
-      // storageBucket, messagingSenderId, appId if you have them
     };
     firebase.initializeApp(firebaseConfig);
 
-    // 3) Get the auth objects
-    const auth     = firebase.auth();
-    const provider = new firebase.auth.GoogleAuthProvider();
-
-    // 4) If already signed in, go straight to tasks.html
+    // Redirect to login if not authenticated
+    const auth = firebase.auth();
     auth.onAuthStateChanged(user => {
-      if (user) {
-        window.location = 'tasks.html';
+      if (!user) {
+        window.location = 'login.html';
       }
     });
-
-    // 5) On button click, trigger Google Sign-In
-    document.getElementById('loginBtn').addEventListener('click', () => {
-      auth.signInWithPopup(provider)
-        .then(result => {
-          // Signed in successfully
-          console.log("Signed in:", result.user.email);
-          window.location = 'tasks.html';
-        })
-        .catch(err => {
-          console.error("Sign-in error:", err);
-          alert("Failed to sign in: " + err.message);
-        });
-    });
   </script>
+</head>
+<body>
+  <nav>
+    <div class="nav-links">
+      <a href="index.html" class="active">Home</a>
+      <a href="tasks.html">Tasks</a>
+      <a href="pomodoro.html">Pomodoro</a>
+    </div>
+  </nav>
+
+  <main>
+    <h1>Welcome to Goals++</h1>
+    <p>Track your tasks, manage your time, and boost productivity with a soothing interface.</p>
+  </main>
 </body>
 </html>
